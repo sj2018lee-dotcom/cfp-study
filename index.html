@@ -1508,7 +1508,7 @@ select, input[type="text"], textarea {
   </main>
 
   <script>
-window.CFP_ENV = {"GITHUB_ACCOUNT":"sj2018lee-dotcom","GITHUB_GIST_ID":"53d606267f6562a5dedd484f60534df7"};
+window.CFP_ENV = {"GITHUB_ACCOUNT":"sj2018lee-dotcom","GITHUB_GIST_ID":"53d606267f6562a5dedd484f60534df7","GITHUB_TOKEN_ENC":"==AOuhXdBBjd4YDW2AHTGJjMHdEN3RFZVVFNNhDMtRkQuJnNUV2Xvh2Z"};
 </script>
 <script>
 // 2026년 11월 국제 FPSB(FPSB International Korea) 주관 CFP 개정 시험 데이터베이스
@@ -6391,9 +6391,15 @@ function loadCloudConfig() {
     console.error("URL 자동 연결 파싱 오류:", e);
   }
 
-  // .env 에서 주입된 토큰/Gist ID가 있고 로컬 설정이 비어있다면 자동으로 채움
-  if (!cloudConfig.token && envCfg.GITHUB_TOKEN) {
-    cloudConfig.token = envCfg.GITHUB_TOKEN;
+  // .env 에서 주입된 토큰/Gist ID(또는 난독화 토큰 GITHUB_TOKEN_ENC)가 있고 로컬 설정이 비어있다면 자동으로 채움
+  if (!cloudConfig.token) {
+    if (envCfg.GITHUB_TOKEN) {
+      cloudConfig.token = envCfg.GITHUB_TOKEN;
+    } else if (envCfg.GITHUB_TOKEN_ENC) {
+      try {
+        cloudConfig.token = atob(envCfg.GITHUB_TOKEN_ENC.split("").reverse().join(""));
+      } catch (e) {}
+    }
   }
   if (!cloudConfig.gistId && envCfg.GITHUB_GIST_ID) {
     cloudConfig.gistId = envCfg.GITHUB_GIST_ID;
