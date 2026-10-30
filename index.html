@@ -790,6 +790,166 @@ body {
   margin-top: 8px;
 }
 
+/* 주관식 셀프 문답(플래시카드) 및 셔플 훈련장 스타일 */
+.self-quiz-section-box {
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.self-quiz-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.self-quiz-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.self-quiz-filter-select {
+  width: auto;
+  min-width: 170px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-color: #a5b4fc;
+  background: #f8fafc;
+}
+
+.btn-shuffle-cards {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  white-space: nowrap;
+}
+
+.btn-shuffle-cards:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+}
+
+.self-quiz-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.self-quiz-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #4f46e5;
+  border-radius: 10px;
+  padding: 15px 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.self-quiz-card:hover {
+  border-color: #a5b4fc;
+}
+
+.self-quiz-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.self-quiz-question-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.5;
+  margin: 6px 0 10px 0;
+  white-space: pre-line;
+}
+
+.btn-toggle-self-answer {
+  background: #eef2ff;
+  border: 1px solid #a5b4fc;
+  color: #3730a3;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-toggle-self-answer:hover {
+  background: #e0e7ff;
+}
+
+.btn-toggle-self-answer.revealed {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.self-quiz-answer-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, margin-top 0.22s ease;
+  margin-top: 0;
+}
+
+.self-quiz-answer-panel.open {
+  max-height: 800px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.self-quiz-answer-inner {
+  background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 100%);
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.93rem;
+  color: #064e3b;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.self-quiz-edit-box {
+  margin-top: 10px;
+  background: #f8fafc;
+  border: 2px solid #6366f1;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.self-quiz-edit-box input,
+.self-quiz-edit-box select,
+.self-quiz-edit-box textarea {
+  margin-bottom: 8px;
+  background: #ffffff;
+}
+
 .quiz-card.highlight-jump {
   box-shadow: 0 0 0 3px #3b82f6, var(--shadow);
   transition: box-shadow 0.3s ease;
@@ -1648,17 +1808,76 @@ select, input[type="text"], textarea {
       </div>
     </section>
 
-    <!-- 탭 3: 나만의 단권화 노트 -->
+    <!-- 탭 3: 나만의 단권화 노트 & 주관식 셀프 문답(플래시카드) -->
     <section id="tab-memory" class="tab-panel">
       <div class="panel-intro">
         <div>
-          <h2>📓 나만의 단권화 노트 (문제별 핵심 메모 &amp; 직접 등록 공식 통합)</h2>
-          <p>문제를 풀며 기록한 <strong>문제별 핵심 메모</strong>와 직접 추가한 <strong>과목별 공식·개념 카드</strong>만 깔끔하게 모아보고 실시간으로 검색할 수 있습니다.</p>
+          <h2>📓 나만의 단권화 노트 &amp; 주관식 셀프 문답 (랜덤 셔플 훈련)</h2>
+          <p>문제를 풀며 기록한 <strong>문제별 핵심 메모</strong>와 직접 만드는 <strong>주관식 셀프 문답(플래시카드)</strong>으로 빈틈없이 암기하고 무작위 셔플 훈련을 진행하세요.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <button id="btn-toggle-add-note" type="button" class="btn-primary">+ 새 메모/공식 추가</button>
+          <button id="btn-toggle-self-quiz-form" type="button" class="btn-primary">🧠 + 주관식 암기 카드 등록</button>
+          <button id="btn-toggle-add-note" type="button" class="btn-secondary">+ 일반 공식/메모 추가</button>
         </div>
       </div>
+
+      <!-- [1] 주관식 셀프 문답(플래시카드) 등록 폼 -->
+      <div id="new-self-quiz-box" class="add-card-box self-quiz-form-box" style="margin-bottom: 16px; border: 2px solid #6366f1; background: linear-gradient(180deg, #eef2ff 0%, #ffffff 70px);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+          <h3 style="margin:0; color:#312e81;">🧠 주관식 셀프 문답(플래시카드) 등록</h3>
+          <button id="btn-close-self-quiz-form" type="button" class="btn-secondary" style="padding:4px 10px; font-size:0.8rem;">접기 ▴</button>
+        </div>
+        <div class="form-row">
+          <select id="self-quiz-subject" style="flex: 0 0 220px;">
+            <option value="재무설계 원론">재무설계 원론 (윤리·프로세스)</option>
+            <option value="개인재무관리">개인재무관리 (TVM·예산·부채)</option>
+            <option value="투자설계">투자설계 (CAPM·채권·파생)</option>
+            <option value="보험설계">보험설계 (위험관리·보험세제)</option>
+            <option value="은퇴설계">은퇴설계 (공적·퇴직·개인연금)</option>
+            <option value="부동산설계">부동산설계 (NOI·타당성 분석)</option>
+            <option value="세금설계">세금설계 (종소세·양도세·금소세)</option>
+            <option value="상속설계">상속설계 (상속·증여·유류분)</option>
+            <option value="통합재무설계">통합재무설계 (복합 사례)</option>
+          </select>
+          <input type="text" id="self-quiz-question" placeholder="질문(문제) 입력 (예: 배우자 상속공제 최소/최대 한도는?)" style="flex: 1 1 320px;" />
+        </div>
+        <textarea id="self-quiz-answer" rows="3" placeholder="정답 및 핵심 해설 입력 (예: 최소 5억원 ~ 법정상속분 내 최대 30억원)"></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button id="btn-add-self-quiz" type="button" class="btn-primary" style="background:#4f46e5;">➕ 암기 카드 등록</button>
+          <span style="font-size:0.8rem; color:#475569;">💡 등록 즉시 아래 플래시카드 훈련 목록과 클라우드 동기화에 자동 반영됩니다.</span>
+        </div>
+      </div>
+
+      <!-- [2] & [3] 주관식 문답 암기 학습 카드 뷰 + 과목별 필터 & 무작위 셔플(Shuffle) 바 -->
+      <div class="self-quiz-section-box">
+        <div class="self-quiz-toolbar">
+          <div class="self-quiz-toolbar-left">
+            <h3 style="margin:0; font-size:1.05rem; color:#1e1b4b;">🎯 주관식 셀프 문답 훈련장 <span id="self-quiz-count-badge" class="badge" style="background:#e0e7ff; color:#3730a3; margin-left:4px;">0장</span></h3>
+          </div>
+          <div class="self-quiz-toolbar-controls">
+            <select id="self-quiz-filter-subject" class="self-quiz-filter-select">
+              <option value="all">📚 전체 과목 보기</option>
+              <option value="재무설계 원론">재무설계 원론</option>
+              <option value="개인재무관리">개인재무관리</option>
+              <option value="투자설계">투자설계</option>
+              <option value="보험설계">보험설계</option>
+              <option value="은퇴설계">은퇴설계</option>
+              <option value="부동산설계">부동산설계</option>
+              <option value="세금설계">세금설계</option>
+              <option value="상속설계">상속설계</option>
+              <option value="통합재무설계">통합재무설계</option>
+            </select>
+            <button id="btn-shuffle-self-quiz" type="button" class="btn-shuffle-cards">🔀 무작위 섞기 (Shuffle)</button>
+            <button id="btn-toggle-all-self-answers" type="button" class="btn-secondary" style="padding:7px 12px; font-size:0.82rem;">👁️ 정답 전체 펼치기/접기</button>
+          </div>
+        </div>
+
+        <div id="self-quiz-list" class="self-quiz-card-list">
+          <!-- JS에서 주관식 셀프 문답 플래시카드가 렌더링됩니다 -->
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:2px dashed #cbd5e1; margin: 26px 0 20px 0;" />
 
       <!-- 새 메모/공식 직접 추가 폼 -->
       <div id="new-summary-card-box" class="add-card-box" style="margin-bottom: 16px; display: none; border: 2px solid #93c5fd;">
@@ -1677,7 +1896,7 @@ select, input[type="text"], textarea {
       <!-- 과목별 필터 & 실시간 검색 바 -->
       <div class="filter-bar" style="margin-bottom: 16px;">
         <div class="filter-group">
-          <label for="memory-subject-filter">과목별 필터</label>
+          <label for="memory-subject-filter">단권화 노트 과목 필터</label>
           <select id="memory-subject-filter">
             <option value="all">전체 과목 단권화 보기</option>
           </select>
@@ -3738,7 +3957,10 @@ const CFP_DATA = {
       front: "2026.11 국제 FPSB 온라인 시험의 승인 계산기, 필기구 규정 및 문항 수준 3단계는?",
       back: "• 승인 계산기: HP(10B/10BII/12C/17BII), TI(BA II PLUS / Professional)\n• 종이·펜·손목시계 엄격 금지 (내장 전자 Excel 스크래치패드만 사용)\n• 문항 3단계 수준: 수집(Recall) · 분석(Analysis) · 종합(Synthesis)"
     }
-  ]
+  ],
+
+  // 주관식 셀프 문답(플래시카드) 기본 시드 데이터 (필요 시 참조)
+  selfQuizSeeds: []
 };
 
 </script>
@@ -4945,6 +5167,7 @@ let state = {
   bookmarks: [],          // 북마크(별표) 문제 ID 목록
   questionNotes: {},      // 문제별 핵심 메모 { [questionId]: { text, updatedAt, subjectId, qType, title } }
   customSummaryCards: [], // 사용자가 직접 등록한 단권화 카드 [{ id, subjectId, title, content, updatedAt }]
+  selfQuizCards: [],      // 주관식 셀프 문답(플래시카드) [{ id: Date.now().toString(), subject: '과목명', question: '질문(문제)', answer: '정답 및 해설', createdAt: ISOstring }]
   stats: {},              // 과목별/유형별 풀이 완료 문항 수 및 누적 정답률 통계
   customCards: [],        // 하위 호환용
   customQuestions: [],    // 사용자가 화면에서 직접 추가하거나 생성한 문제 배열
@@ -4983,8 +5206,20 @@ function normalizeAndRecalculateState() {
   if (!Array.isArray(state.bookmarks)) state.bookmarks = [];
   if (!state.questionNotes || typeof state.questionNotes !== "object") state.questionNotes = {};
   if (!Array.isArray(state.customSummaryCards)) state.customSummaryCards = [];
+  if (!Array.isArray(state.selfQuizCards)) state.selfQuizCards = [];
   if (!Array.isArray(state.customCards)) state.customCards = [];
   if (!Array.isArray(state.customQuestions)) state.customQuestions = [];
+
+  // selfQuizCards 필드 정규화
+  state.selfQuizCards = state.selfQuizCards
+    .filter((c) => c && (c.question || c.answer))
+    .map((c) => ({
+      id: String(c.id || Date.now()),
+      subject: c.subject || "재무설계 원론",
+      question: (c.question || "").trim(),
+      answer: (c.answer || "").trim(),
+      createdAt: c.createdAt || c.updatedAt || new Date().toISOString()
+    }));
 
   // 기존 customCards(사용자가 직접 추가했던 카드)가 있다면 customSummaryCards로 자동 이관
   if (state.customCards.length > 0) {
@@ -5208,7 +5443,7 @@ function saveState(options = {}) {
 function buildSyncPayload() {
   normalizeAndRecalculateState();
   return {
-    syncVersion: "2026.11-v4",
+    syncVersion: "2026.11-v5",
     exportedAt: new Date().toISOString(),
     wrongList: state.wrongList,
     wrongNotes: state.wrongNotes,
@@ -5218,6 +5453,7 @@ function buildSyncPayload() {
     unsolvedTombstones: state.unsolvedTombstones,
     questionNotes: state.questionNotes,
     customSummaryCards: state.customSummaryCards,
+    selfQuizCards: state.selfQuizCards,
     stats: state.stats,
     customCards: state.customCards,
     customQuestions: state.customQuestions
@@ -5312,6 +5548,42 @@ function smartMergeSyncData(incoming, options = {}) {
         state.customSummaryCards.push(incCard);
         cardMap.set(incCard.id, incCard);
         signatureSet.add(sig);
+      }
+    });
+  }
+
+  // 1-2b. 주관식 셀프 문답(selfQuizCards) 합집합 병합
+  if (Array.isArray(incoming.selfQuizCards) && incoming.selfQuizCards.length > 0) {
+    const sqMap = new Map((state.selfQuizCards || []).map((c) => [String(c.id), c]));
+    const sqSigSet = new Set((state.selfQuizCards || []).map((c) => `${c.subject}::${c.question}`));
+    incoming.selfQuizCards.forEach((incCard) => {
+      if (!incCard || (!incCard.question && !incCard.answer)) return;
+      const cid = String(incCard.id || Date.now());
+      const sig = `${incCard.subject || "재무설계 원론"}::${(incCard.question || "").trim()}`;
+      if (sqMap.has(cid)) {
+        const locCard = sqMap.get(cid);
+        const locTime = Date.parse(locCard.createdAt || "") || 0;
+        const incTime = Date.parse(incCard.createdAt || "") || 0;
+        if (incTime >= locTime) {
+          Object.assign(locCard, {
+            id: cid,
+            subject: incCard.subject || locCard.subject,
+            question: (incCard.question || "").trim(),
+            answer: (incCard.answer || "").trim(),
+            createdAt: incCard.createdAt || locCard.createdAt
+          });
+        }
+      } else if (!sqSigSet.has(sig)) {
+        const normalized = {
+          id: cid,
+          subject: incCard.subject || "재무설계 원론",
+          question: (incCard.question || "").trim(),
+          answer: (incCard.answer || "").trim(),
+          createdAt: incCard.createdAt || new Date().toISOString()
+        };
+        state.selfQuizCards.push(normalized);
+        sqMap.set(cid, normalized);
+        sqSigSet.add(sig);
       }
     });
   }
@@ -5645,7 +5917,7 @@ function updateHeaderStats() {
   const solvedCount = s.totalSolved !== undefined ? s.totalSolved : Object.keys(state.solvedMap).length;
   const wrongCount = state.wrongNotes.length;
   const bookmarkCount = (state.bookmarks || []).length;
-  const totalSummaryNotes = getAllSummaryNoteItems().length;
+  const totalSummaryNotes = getAllSummaryNoteItems().length + (state.selfQuizCards ? state.selfQuizCards.length : 0);
   const progressPct = s.progressPct || 0;
   const accuracyPct = s.accuracyPct || 0;
 
@@ -6333,8 +6605,218 @@ function jumpToQuestionCard(questionId) {
   }
 }
 
+const SELF_QUIZ_SUBJECTS = [
+  "재무설계 원론",
+  "개인재무관리",
+  "투자설계",
+  "보험설계",
+  "은퇴설계",
+  "부동산설계",
+  "세금설계",
+  "상속설계",
+  "통합재무설계"
+];
+
+let selfQuizRevealedIds = new Set();
+
+// Fisher-Yates 무작위 셔플 알고리즘
+function fisherYatesShuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+// 주관식 셀프 문답(플래시카드) 렌더링
+function renderSelfQuizCards(options = {}) {
+  const listEl = document.getElementById("self-quiz-list");
+  const countBadge = document.getElementById("self-quiz-count-badge");
+  const filterSelect = document.getElementById("self-quiz-filter-subject");
+  if (!listEl) return;
+
+  if (!Array.isArray(state.selfQuizCards)) state.selfQuizCards = [];
+  const subjFilter = filterSelect ? filterSelect.value : "all";
+
+  if (options.shuffleAll) {
+    state.selfQuizCards = fisherYatesShuffle(state.selfQuizCards);
+  }
+
+  let filtered = state.selfQuizCards.filter((card) => {
+    if (!card || (!card.question && !card.answer)) return false;
+    if (subjFilter !== "all" && card.subject !== subjFilter) return false;
+    return true;
+  });
+
+  if (options.shuffleFiltered) {
+    filtered = fisherYatesShuffle(filtered);
+  }
+
+  if (countBadge) {
+    countBadge.textContent = subjFilter === "all"
+      ? `총 ${filtered.length}장`
+      : `${subjFilter} ${filtered.length}장`;
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state" style="padding: 24px 16px;">
+        <h4 style="margin-bottom: 6px; color: var(--text);">등록된 주관식 암기 카드가 없습니다 🧠</h4>
+        <p style="font-size: 0.86rem;">위의 <strong>[주관식 셀프 문답 등록]</strong> 폼에서 과목과 질문·정답을 입력해 나만의 플래시카드를 만들어 보세요!</p>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = "";
+  filtered.forEach((card, idx) => {
+    const isRevealed = selfQuizRevealedIds.has(String(card.id));
+    const cardEl = document.createElement("div");
+    cardEl.className = "self-quiz-card";
+
+    const subjectOptionsHtml = SELF_QUIZ_SUBJECTS.map(
+      (s) => `<option value="${s}" ${s === card.subject ? "selected" : ""}>${s}</option>`
+    ).join("");
+
+    cardEl.innerHTML = `
+      <div class="self-quiz-card-top">
+        <div class="meta-badges">
+          <span class="badge" style="background:#e0e7ff; color:#312e81; border:1px solid #c7d2fe;">📚 ${card.subject}</span>
+          <span class="badge" style="background:#f1f5f9; color:#475569;">#${idx + 1}</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">🕒 ${formatDateTime(card.createdAt)}</span>
+        </div>
+        <div class="summary-note-actions">
+          <button type="button" class="btn-secondary btn-edit-self-quiz" data-id="${card.id}" style="padding:5px 11px; font-size:0.8rem;">✏️ 수정</button>
+          <button type="button" class="btn-danger-outline btn-delete-self-quiz" data-id="${card.id}" style="padding:5px 11px; font-size:0.8rem;">🗑️ 삭제</button>
+        </div>
+      </div>
+
+      <div class="self-quiz-view-mode">
+        <div class="self-quiz-question-text">Q. ${card.question}</div>
+        <button type="button" class="btn-toggle-self-answer ${isRevealed ? "revealed" : ""}" data-id="${card.id}">
+          ${isRevealed ? "🙈 정답 숨기기 / 접기 ▴" : "💡 정답 확인 / 펼치기 ▾"}
+        </button>
+        <div class="self-quiz-answer-panel ${isRevealed ? "open" : ""}" id="sq-ans-${card.id}">
+          <div class="self-quiz-answer-inner"><strong>A. 정답 및 해설</strong>\n${card.answer}</div>
+        </div>
+      </div>
+
+      <div class="self-quiz-edit-box" style="display: none;">
+        <div class="form-row" style="margin-bottom:6px;">
+          <select class="sq-edit-subject" style="flex:0 0 180px;">${subjectOptionsHtml}</select>
+          <input type="text" class="sq-edit-question" placeholder="질문(문제) 입력" style="flex:1 1 260px;" />
+        </div>
+        <textarea class="sq-edit-answer" rows="3" placeholder="정답 및 해설 입력"></textarea>
+        <div class="summary-note-edit-actions">
+          <button type="button" class="btn-primary btn-save-sq-edit" style="padding:6px 14px; font-size:0.82rem;">저장</button>
+          <button type="button" class="btn-secondary btn-cancel-sq-edit" style="padding:6px 14px; font-size:0.82rem;">취소</button>
+        </div>
+      </div>
+    `;
+
+    const viewModeEl = cardEl.querySelector(".self-quiz-view-mode");
+    const editBoxEl = cardEl.querySelector(".self-quiz-edit-box");
+    const toggleAnsBtn = cardEl.querySelector(".btn-toggle-self-answer");
+    const ansPanelEl = cardEl.querySelector(".self-quiz-answer-panel");
+    const btnEdit = cardEl.querySelector(".btn-edit-self-quiz");
+    const btnDelete = cardEl.querySelector(".btn-delete-self-quiz");
+    const editSubjEl = cardEl.querySelector(".sq-edit-subject");
+    const editQEl = cardEl.querySelector(".sq-edit-question");
+    const editAEl = cardEl.querySelector(".sq-edit-answer");
+    const btnSaveEdit = cardEl.querySelector(".btn-save-sq-edit");
+    const btnCancelEdit = cardEl.querySelector(".btn-cancel-sq-edit");
+
+    if (editQEl) editQEl.value = card.question;
+    if (editAEl) editAEl.value = card.answer;
+
+    if (toggleAnsBtn && ansPanelEl) {
+      toggleAnsBtn.addEventListener("click", () => {
+        const cid = String(card.id);
+        const nowOpen = !ansPanelEl.classList.contains("open");
+        ansPanelEl.classList.toggle("open", nowOpen);
+        toggleAnsBtn.classList.toggle("revealed", nowOpen);
+        toggleAnsBtn.innerHTML = nowOpen
+          ? "🙈 정답 숨기기 / 접기 ▴"
+          : "💡 정답 확인 / 펼치기 ▾";
+        if (nowOpen) {
+          selfQuizRevealedIds.add(cid);
+        } else {
+          selfQuizRevealedIds.delete(cid);
+        }
+      });
+    }
+
+    const commitSqEdit = () => {
+      const nextSubj = editSubjEl ? editSubjEl.value : card.subject;
+      const nextQ = (editQEl?.value || "").trim();
+      const nextA = (editAEl?.value || "").trim();
+      if (!nextQ || !nextA) {
+        alert("질문(문제)과 정답 내용을 모두 입력해 주세요.");
+        return;
+      }
+      const target = (state.selfQuizCards || []).find((c) => String(c.id) === String(card.id));
+      if (target) {
+        target.subject = nextSubj;
+        target.question = nextQ;
+        target.answer = nextA;
+        target.createdAt = new Date().toISOString();
+      }
+      saveState();
+      renderSelfQuizCards();
+    };
+
+    if (btnEdit) {
+      btnEdit.addEventListener("click", () => {
+        editSubjEl.value = card.subject;
+        editQEl.value = card.question;
+        editAEl.value = card.answer;
+        viewModeEl.style.display = "none";
+        editBoxEl.style.display = "block";
+        editQEl.focus();
+      });
+    }
+
+    if (btnCancelEdit) {
+      btnCancelEdit.addEventListener("click", () => {
+        editBoxEl.style.display = "none";
+        viewModeEl.style.display = "block";
+      });
+    }
+
+    if (btnSaveEdit) {
+      btnSaveEdit.addEventListener("click", commitSqEdit);
+    }
+
+    if (editAEl) {
+      editAEl.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          commitSqEdit();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          editBoxEl.style.display = "none";
+          viewModeEl.style.display = "block";
+        }
+      });
+    }
+
+    if (btnDelete) {
+      btnDelete.addEventListener("click", () => {
+        state.selfQuizCards = (state.selfQuizCards || []).filter((c) => String(c.id) !== String(card.id));
+        selfQuizRevealedIds.delete(String(card.id));
+        saveState();
+        renderSelfQuizCards();
+      });
+    }
+
+    listEl.appendChild(cardEl);
+  });
+}
+
 // 3. 나만의 단권화 노트 탭 렌더링 (문제별 핵심 메모 + 직접 등록 단권화 카드 통합)
 function renderMemoryCards() {
+  renderSelfQuizCards();
   const grid = document.getElementById("memory-grid");
   const subjFilter = document.getElementById("memory-subject-filter")?.value || "all";
   const typeFilter = document.getElementById("memory-type-filter")?.value || "all";
@@ -6595,6 +7077,97 @@ function renderSubjectDashboard() {
 }
 
 function initActions() {
+  // 주관식 셀프 문답(플래시카드) 등록 폼 및 셔플/필터 이벤트 연결
+  const newSelfQuizBox = document.getElementById("new-self-quiz-box");
+  const btnToggleSelfQuizForm = document.getElementById("btn-toggle-self-quiz-form");
+  const btnCloseSelfQuizForm = document.getElementById("btn-close-self-quiz-form");
+  const btnAddSelfQuiz = document.getElementById("btn-add-self-quiz");
+  const sqFilterSubject = document.getElementById("self-quiz-filter-subject");
+  const btnShuffleSelfQuiz = document.getElementById("btn-shuffle-self-quiz");
+  const btnToggleAllSelfAnswers = document.getElementById("btn-toggle-all-self-answers");
+
+  if (btnToggleSelfQuizForm && newSelfQuizBox) {
+    btnToggleSelfQuizForm.addEventListener("click", () => {
+      const isHidden = newSelfQuizBox.style.display === "none";
+      newSelfQuizBox.style.display = isHidden ? "block" : "none";
+      if (isHidden) {
+        document.getElementById("self-quiz-question")?.focus();
+      }
+    });
+  }
+
+  if (btnCloseSelfQuizForm && newSelfQuizBox) {
+    btnCloseSelfQuizForm.addEventListener("click", () => {
+      newSelfQuizBox.style.display = "none";
+    });
+  }
+
+  if (btnAddSelfQuiz) {
+    btnAddSelfQuiz.addEventListener("click", () => {
+      const subjectEl = document.getElementById("self-quiz-subject");
+      const questionEl = document.getElementById("self-quiz-question");
+      const answerEl = document.getElementById("self-quiz-answer");
+
+      const subject = subjectEl ? subjectEl.value : "재무설계 원론";
+      const question = (questionEl?.value || "").trim();
+      const answer = (answerEl?.value || "").trim();
+
+      if (!question || !answer) {
+        alert("주관식 질문(문제)과 정답 및 해설을 모두 입력해 주세요.");
+        return;
+      }
+
+      if (!Array.isArray(state.selfQuizCards)) state.selfQuizCards = [];
+      const newCard = {
+        id: Date.now().toString(),
+        subject,
+        question,
+        answer,
+        createdAt: new Date().toISOString()
+      };
+      state.selfQuizCards.unshift(newCard);
+
+      if (questionEl) questionEl.value = "";
+      if (answerEl) answerEl.value = "";
+      saveState();
+      renderSelfQuizCards();
+      questionEl?.focus();
+    });
+  }
+
+  if (sqFilterSubject) {
+    sqFilterSubject.addEventListener("change", () => {
+      // 과목 변경 시 해당 과목 카드만 필터링되며 무작위로 재배열되어 출력 (Fisher-Yates)
+      selfQuizRevealedIds.clear();
+      renderSelfQuizCards({ shuffleAll: true });
+    });
+  }
+
+  if (btnShuffleSelfQuiz) {
+    btnShuffleSelfQuiz.addEventListener("click", () => {
+      selfQuizRevealedIds.clear();
+      renderSelfQuizCards({ shuffleAll: true });
+      saveState({ skipCloudPush: true });
+    });
+  }
+
+  if (btnToggleAllSelfAnswers) {
+    btnToggleAllSelfAnswers.addEventListener("click", () => {
+      const subjFilter = sqFilterSubject ? sqFilterSubject.value : "all";
+      const visibleCards = (state.selfQuizCards || []).filter(
+        (c) => c && (subjFilter === "all" || c.subject === subjFilter)
+      );
+      if (visibleCards.length === 0) return;
+      const allOpen = visibleCards.every((c) => selfQuizRevealedIds.has(String(c.id)));
+      if (allOpen) {
+        visibleCards.forEach((c) => selfQuizRevealedIds.delete(String(c.id)));
+      } else {
+        visibleCards.forEach((c) => selfQuizRevealedIds.add(String(c.id)));
+      }
+      renderSelfQuizCards();
+    });
+  }
+
   const newSummaryBox = document.getElementById("new-summary-card-box");
   const btnToggleAddNote = document.getElementById("btn-toggle-add-note");
   if (btnToggleAddNote && newSummaryBox) {
