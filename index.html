@@ -160,10 +160,11 @@ body {
 .overall-progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  line-height: 1.3;
   color: #e2e8f0;
-  margin-bottom: 5px;
-  gap: 8px;
+  margin-bottom: 4px;
+  gap: 4px 10px;
   flex-wrap: wrap;
 }
 
@@ -1088,14 +1089,20 @@ select, input[type="text"], textarea {
   .header-sync-bar {
     flex-direction: column;
     align-items: stretch;
-    padding: 10px 12px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .overall-progress-wrap {
+    flex: 0 0 auto;
+    width: 100%;
   }
 
   .sync-btn-group {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
   }
 
   .cloud-sync-form {
