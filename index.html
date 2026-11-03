@@ -1712,8 +1712,9 @@ select, input[type="text"], textarea {
   }
 
   .form-row > * {
-    flex: 1 1 100%;
+    flex: 0 0 auto !important;
     width: 100%;
+    height: auto;
   }
 }
 
@@ -9042,6 +9043,7 @@ function renderGeneralSummaryNotes() {
           <span class="summary-note-time">🕒 작성/수정 일시: ${formatDateTime(item.updatedAt)}</span>
         </div>
         <div class="summary-note-edit-box" style="display: none;">
+          ${item.itemType === "custom" ? `<input type="text" class="summary-note-edit-title" placeholder="제목" style="width:100%; margin-bottom:8px;" />` : ""}
           <textarea class="summary-note-edit-textarea" rows="4"></textarea>
           <div class="summary-note-edit-actions">
             <button type="button" class="btn-primary btn-save-edit-note" data-type="${item.itemType}" data-id="${item.id}" style="padding:6px 14px; font-size:0.82rem;">저장</button>
@@ -9063,8 +9065,12 @@ function renderGeneralSummaryNotes() {
     const btnSaveEdit = cardEl.querySelector(".btn-save-edit-note");
     const btnCancelEdit = cardEl.querySelector(".btn-cancel-edit-note");
 
+    const editTitleInput = cardEl.querySelector(".summary-note-edit-title");
     if (editTextarea) {
       editTextarea.value = item.content;
+    }
+    if (editTitleInput) {
+      editTitleInput.value = item.title || "";
     }
 
     const commitInlineEdit = () => {
@@ -9081,6 +9087,10 @@ function renderGeneralSummaryNotes() {
         const targetCard = (state.customSummaryCards || []).find((c) => c.id === item.id);
         if (targetCard) {
           targetCard.content = newText;
+          if (editTitleInput) {
+            const newTitle = (editTitleInput.value || "").trim();
+            if (newTitle) targetCard.title = newTitle;
+          }
           targetCard.updatedAt = nowIso;
         }
         saveState();
@@ -9092,6 +9102,7 @@ function renderGeneralSummaryNotes() {
     if (btnEdit) {
       btnEdit.addEventListener("click", () => {
         editTextarea.value = item.content;
+        if (editTitleInput) editTitleInput.value = item.title || "";
         viewBox.style.display = "none";
         editBox.style.display = "block";
         editTextarea.focus();
