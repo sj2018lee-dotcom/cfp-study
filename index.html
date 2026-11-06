@@ -1736,6 +1736,41 @@ select, input[type="text"], textarea {
   }
 }
 
+/* ===== 즐겨찾기 ===== */
+.btn-fav-star {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  color: #94a3b8;
+}
+.btn-fav-star.on {
+  background: #fef9c3;
+  border-color: #facc15;
+  color: #ca8a04;
+}
+.btn-fav-filter {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #475569;
+  white-space: nowrap;
+}
+.btn-fav-filter.active {
+  background: #fef9c3;
+  border-color: #facc15;
+  color: #854d0e;
+}
+@media screen and (max-width: 768px) {
+  .btn-fav-filter { width: 100%; }
+}
   </style>
 </head>
 <body>
@@ -2015,6 +2050,10 @@ select, input[type="text"], textarea {
               <option value="custom">📌 직접 등록한 메모/공식만</option>
             </select>
           </div>
+          <div class="filter-group" style="flex: 0 0 auto;">
+            <label>즐겨찾기</label>
+            <button id="btn-fav-filter-notes" type="button" class="btn-fav-filter">☆ 즐겨찾기만 보기</button>
+          </div>
           <div class="filter-group" style="flex: 2 1 260px;">
             <label for="memory-search-input">실시간 키워드 검색</label>
             <input type="text" id="memory-search-input" placeholder="🔍 문제 번호(예: Q025), 키워드, 공식, 메모 내용으로 즉시 검색..." />
@@ -2084,6 +2123,7 @@ select, input[type="text"], textarea {
                 <option value="상속설계">상속설계</option>
                 <option value="통합재무설계">통합재무설계</option>
               </select>
+              <button id="btn-fav-filter-quiz" type="button" class="btn-fav-filter">☆ 즐겨찾기만 보기</button>
               <button id="btn-shuffle-self-quiz" type="button" class="btn-shuffle-cards">🔀 무작위 섞기 (Shuffle)</button>
               <button id="btn-toggle-all-self-answers" type="button" class="btn-secondary" style="padding:7px 12px; font-size:0.82rem;">👁️ 정답 전체 펼치기/접기</button>
             </div>
@@ -7197,6 +7237,7 @@ let state = {
   bookmarks: [],          // 북마크(별표) 문제 ID 목록
   questionNotes: {},      // 문제별 핵심 메모 { [questionId]: { text, updatedAt, subjectId, qType, title } }
   customSummaryCards: [], // 사용자가 직접 등록한 단권화 카드 [{ id, subjectId, title, content, updatedAt }]
+  memoryFavorites: {}, // 즐겨찾기 { "n:qnote:Q001" | "n:custom:ID" | "q:카드ID": { on: boolean, at: ISOstring } }
   selfQuizCards: [],      // 주관식 셀프 문답(플래시카드) [{ id: Date.now().toString(), subject: '과목명', question: '질문(문제)', answer: '정답 및 해설', createdAt: ISOstring }]
   stats: {},              // 과목별/유형별 풀이 완료 문항 수 및 누적 정답률 통계
   customCards: [],        // 하위 호환용
@@ -7227,7 +7268,42 @@ function formatDateTime(isoStr) {
 }
 
 // state 내부 필드 정규화 및 통계(stats) 자동 재계산
+// ===== 즐겨찾기 (단권화 노트 / 주관식 암기 카드 공용) =====
+let favOnlyNotes = false;
+let favOnlyQuiz = false;
+
+function isFavorite(key) {
+  const f = state.memoryFavorites && state.memoryFavorites[key];
+  return !!(f && f.on);
+}
+
+function toggleFavorite(key) {
+  if (!state.memoryFavorites || typeof state.memoryFavorites !== "object") state.memoryFavorites = {};
+  state.memoryFavorites[key] = { on: !isFavorite(key), at: new Date().toISOString() };
+  saveState();
+}
+
+function countFavorites(prefix) {
+  return Object.keys(state.memoryFavorites || {}).filter((k) => k.startsWith(prefix) && state.memoryFavorites[k].on).length;
+}
+
+function updateFavFilterButtons() {
+  const bn = document.getElementById("btn-fav-filter-notes");
+  if (bn) {
+    bn.classList.toggle("active", favOnlyNotes);
+    bn.textContent = `${favOnlyNotes ? "⭐ 즐겨찾기만 보는 중" : "☆ 즐겨찾기만 보기"} (${countFavorites("n:")})`;
+  }
+  const bq = document.getElementById("btn-fav-filter-quiz");
+  if (bq) {
+    bq.classList.toggle("active", favOnlyQuiz);
+    bq.textContent = `${favOnlyQuiz ? "⭐ 즐겨찾기만 보는 중" : "☆ 즐겨찾기만 보기"} (${countFavorites("q:")})`;
+  }
+}
+
 function normalizeAndRecalculateState() {
+  if (!state.memoryFavorites || typeof state.memoryFavorites !== "object" || Array.isArray(state.memoryFavorites)) {
+    state.memoryFavorites = {};
+  }
   if (!state.solvedMap) state.solvedMap = {};
   if (!state.history) state.history = {};
   if (!state.unsolvedTombstones || typeof state.unsolvedTombstones !== "object") state.unsolvedTombstones = {};
@@ -7558,7 +7634,7 @@ function restoreSnapshot(index) {
   takeSnapshot("복원 직전 자동 보관", true);
   const keys = [
     "wrongList", "wrongNotes", "bookmarks", "history", "solvedMap", "unsolvedTombstones",
-    "questionNotes", "customSummaryCards", "selfQuizCards", "deletedDefaultCardIds",
+    "questionNotes", "customSummaryCards", "selfQuizCards", "deletedDefaultCardIds", "memoryFavorites",
     "stats", "customCards", "customQuestions"
   ];
   keys.forEach((k) => {
@@ -7620,6 +7696,7 @@ function buildSyncPayload() {
     questionNotes: state.questionNotes,
     customSummaryCards: state.customSummaryCards,
     selfQuizCards: state.selfQuizCards,
+    memoryFavorites: state.memoryFavorites || {},
     deletedDefaultCardIds: state.deletedDefaultCardIds || [],
     stats: state.stats,
     customCards: state.customCards,
@@ -7766,6 +7843,19 @@ function smartMergeSyncData(incoming, options = {}) {
     const delSet = new Set(state.deletedDefaultCardIds.map(String));
     incoming.deletedDefaultCardIds.forEach((id) => delSet.add(String(id)));
     state.deletedDefaultCardIds = Array.from(delSet);
+  }
+
+  // 1-2d. 즐겨찾기 병합 (항목별 최신 변경 우선)
+  if (incoming.memoryFavorites && typeof incoming.memoryFavorites === "object") {
+    if (!state.memoryFavorites || typeof state.memoryFavorites !== "object") state.memoryFavorites = {};
+    Object.keys(incoming.memoryFavorites).forEach((k) => {
+      const inc = incoming.memoryFavorites[k];
+      if (!inc || typeof inc !== "object") return;
+      const cur = state.memoryFavorites[k];
+      if (!cur || new Date(inc.at || 0).getTime() > new Date(cur.at || 0).getTime()) {
+        state.memoryFavorites[k] = { on: !!inc.on, at: inc.at || new Date().toISOString() };
+      }
+    });
   }
 
   // 1-3. 문제별 핵심 메모(questionNotes) 지능형 병합 (최신 타임스탬프 또는 더 긴 메모 우선 유지)
@@ -8885,8 +8975,11 @@ function renderSelfQuizCards(options = {}) {
   let filtered = state.selfQuizCards.filter((card) => {
     if (!card || (!card.question && !card.answer)) return false;
     if (subjFilter !== "all" && card.subject !== subjFilter) return false;
+    if (favOnlyQuiz && !isFavorite(`q:${card.id}`)) return false;
     return true;
   });
+
+  updateFavFilterButtons();
 
   if (options.shuffleFiltered) {
     filtered = fisherYatesShuffle(filtered);
@@ -8901,7 +8994,7 @@ function renderSelfQuizCards(options = {}) {
   if (filtered.length === 0) {
     listEl.innerHTML = `
       <div class="empty-state" style="padding: 28px 16px;">
-        <h4 style="margin-bottom: 6px; color: var(--text);">선택하신 과목의 암기 카드가 없습니다 🧠</h4>
+        <h4 style="margin-bottom: 6px; color: var(--text);">${favOnlyQuiz ? "즐겨찾기한 암기 카드가 없습니다 ⭐" : "선택하신 과목의 암기 카드가 없습니다 🧠"}</h4>
         <p style="font-size: 0.88rem;">위의 <strong>[➕ 주관식 암기 카드 등록]</strong> 버튼으로 새 카드를 추가하거나 과목 필터를 [전체 과목 보기]로 변경해 보세요.</p>
       </div>
     `;
@@ -8929,6 +9022,7 @@ function renderSelfQuizCards(options = {}) {
           <span style="font-size:0.75rem; color:var(--text-muted);">🕒 ${formatDateTime(card.createdAt)}</span>
         </div>
         <div class="summary-note-actions">
+          <button type="button" class="btn-fav-star ${isFavorite(`q:${card.id}`) ? "on" : ""}" aria-pressed="${isFavorite(`q:${card.id}`)}" title="즐겨찾기">${isFavorite(`q:${card.id}`) ? "⭐" : "☆"}</button>
           <button type="button" class="btn-secondary btn-edit-self-quiz" data-id="${card.id}" style="padding:4px 10px; font-size:0.78rem;">✏️ 수정</button>
           <button type="button" class="btn-danger-outline btn-delete-self-quiz" data-id="${card.id}" style="padding:4px 10px; font-size:0.78rem;">🗑️ 삭제</button>
         </div>
@@ -8970,6 +9064,14 @@ function renderSelfQuizCards(options = {}) {
     const accordionHeaderEl = cardEl.querySelector(".self-quiz-accordion-header");
     const ansPanelEl = cardEl.querySelector(".self-quiz-answer-panel");
     const btnEdit = cardEl.querySelector(".btn-edit-self-quiz");
+    const btnFavSq = cardEl.querySelector(".btn-fav-star");
+    if (btnFavSq) {
+      btnFavSq.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleFavorite(`q:${card.id}`);
+        renderSelfQuizCards();
+      });
+    }
     const btnDelete = cardEl.querySelector(".btn-delete-self-quiz");
     const editSubjEl = cardEl.querySelector(".sq-edit-subject");
     const editQEl = cardEl.querySelector(".sq-edit-question");
@@ -9100,6 +9202,7 @@ function renderGeneralSummaryNotes() {
   const allItems = getAllSummaryNoteItems().filter((item) => {
     if (subjFilter !== "all" && item.subjectId !== subjFilter) return false;
     if (typeFilter !== "all" && item.itemType !== typeFilter) return false;
+    if (favOnlyNotes && !isFavorite(`n:${item.itemType}:${item.id}`)) return false;
     if (searchQuery) {
       const subjName = getSubjectById(item.subjectId).name.toLowerCase();
       const qidStr = (item.questionId || "").toLowerCase();
@@ -9117,7 +9220,19 @@ function renderGeneralSummaryNotes() {
     return true;
   });
 
+  updateFavFilterButtons();
+
   if (allItems.length === 0) {
+    if (favOnlyNotes) {
+      grid.innerHTML = `
+      <div class="empty-state">
+        <h3>즐겨찾기한 메모가 없습니다 ⭐</h3>
+        <p>각 메모 카드의 <strong>☆</strong> 버튼을 눌러 즐겨찾기에 추가해 보세요.</p>
+      </div>
+    `;
+      updateMemoryBadges();
+      return;
+    }
     grid.innerHTML = `
       <div class="empty-state">
         <h3>아직 작성된 일반 공식 &amp; 핵심 메모가 없습니다 ✍️</h3>
@@ -9175,6 +9290,7 @@ function renderGeneralSummaryNotes() {
         </div>
       </div>
       <div class="summary-note-actions">
+                <button type="button" class="btn-fav-star ${isFavorite(`n:${item.itemType}:${item.id}`) ? "on" : ""}" aria-pressed="${isFavorite(`n:${item.itemType}:${item.id}`)}" title="즐겨찾기">${isFavorite(`n:${item.itemType}:${item.id}`) ? "⭐" : "☆"}</button>
         ${moveBtnHtml}
         <button type="button" class="btn-secondary btn-edit-note" data-type="${item.itemType}" data-id="${item.id}" style="padding:6px 12px; font-size:0.82rem;">✏️ 수정</button>
         <button type="button" class="btn-danger-outline btn-delete-note" data-type="${item.itemType}" data-id="${item.id}" style="padding:6px 12px; font-size:0.82rem;">🗑️ 삭제</button>
@@ -9185,6 +9301,13 @@ function renderGeneralSummaryNotes() {
     const editBox = cardEl.querySelector(".summary-note-edit-box");
     const editTextarea = cardEl.querySelector(".summary-note-edit-textarea");
     const btnEdit = cardEl.querySelector(".btn-edit-note");
+    const btnFavNote = cardEl.querySelector(".btn-fav-star");
+    if (btnFavNote) {
+      btnFavNote.addEventListener("click", () => {
+        toggleFavorite(`n:${item.itemType}:${item.id}`);
+        renderGeneralSummaryNotes();
+      });
+    }
     const btnSaveEdit = cardEl.querySelector(".btn-save-edit-note");
     const btnCancelEdit = cardEl.querySelector(".btn-cancel-edit-note");
 
@@ -9393,6 +9516,22 @@ function initActions() {
   const btnShuffleSelfQuiz = document.getElementById("btn-shuffle-self-quiz");
   const btnToggleAllSelfAnswers = document.getElementById("btn-toggle-all-self-answers");
 
+  const btnFavFilterNotes = document.getElementById("btn-fav-filter-notes");
+  if (btnFavFilterNotes) {
+    btnFavFilterNotes.addEventListener("click", () => {
+      favOnlyNotes = !favOnlyNotes;
+      renderGeneralSummaryNotes();
+    });
+  }
+  const btnFavFilterQuiz = document.getElementById("btn-fav-filter-quiz");
+  if (btnFavFilterQuiz) {
+    btnFavFilterQuiz.addEventListener("click", () => {
+      favOnlyQuiz = !favOnlyQuiz;
+      renderSelfQuizCards();
+    });
+  }
+  updateFavFilterButtons();
+
   if (btnToggleSelfQuizForm && newSelfQuizBox) {
     btnToggleSelfQuizForm.addEventListener("click", () => {
       const isHidden = newSelfQuizBox.style.display === "none";
@@ -9462,7 +9601,7 @@ function initActions() {
     btnToggleAllSelfAnswers.addEventListener("click", () => {
       const subjFilter = sqFilterSubject ? sqFilterSubject.value : "all";
       const visibleCards = (state.selfQuizCards || []).filter(
-        (c) => c && (subjFilter === "all" || c.subject === subjFilter)
+        (c) => c && (subjFilter === "all" || c.subject === subjFilter) && (!favOnlyQuiz || isFavorite(`q:${c.id}`))
       );
       if (visibleCards.length === 0) return;
       const allOpen = visibleCards.every((c) => selfQuizRevealedIds.has(String(c.id)));
