@@ -2171,7 +2171,7 @@ select, input[type="text"], textarea {
   </main>
 
   <script>
-window.CFP_ENV = {"GITHUB_ACCOUNT":"sj2018lee-dotcom","GITHUB_GIST_ID":"53d606267f6562a5dedd484f60534df7","GITHUB_TOKEN_ENC":"==AOuhXdBBjd4YDW2AHTGJjMHdEN3RFZVVFNNhDMtRkQuJnNUV2Xvh2Z"};
+window.CFP_ENV = {};
 </script>
 <script>
 // 2026년 11월 국제 FPSB(FPSB International Korea) 주관 CFP 개정 시험 데이터베이스
@@ -9752,7 +9752,6 @@ function initActions() {
 // GitHub Gist 클라우드 자동 동기화 모듈 (100% 무료 서버리스)
 // ============================================================
 function loadCloudConfig() {
-  const envCfg = (typeof window !== "undefined" && window.CFP_ENV) ? window.CFP_ENV : {};
   try {
     const raw = localStorage.getItem(CLOUD_CONFIG_KEY);
     if (raw) {
@@ -9763,33 +9762,14 @@ function loadCloudConfig() {
     console.error("클라우드 설정 로드 오류:", e);
   }
 
-  // URL 해시(#sync=...)로 전달된 원클릭 자동 연결 정보가 있으면 즉시 저장 후 주소창에서 숨김
+  // 보안: 토큰은 코드/번들/URL에 포함하지 않고, 사용자가 각 기기의 [클라우드 동기화] 패널에서 직접 입력해
+  // 이 브라우저의 localStorage에만 저장합니다. (과거 #sync= URL 방식은 토큰이 주소에 노출되어 제거됨)
   try {
     if (typeof window !== "undefined" && window.location && window.location.hash.startsWith("#sync=")) {
-      const encoded = window.location.hash.slice("#sync=".length);
-      const decoded = JSON.parse(atob(decodeURIComponent(encoded)));
-      if (decoded.t) cloudConfig.token = decoded.t;
-      if (decoded.g) cloudConfig.gistId = decoded.g;
-      localStorage.setItem(CLOUD_CONFIG_KEY, JSON.stringify(cloudConfig));
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }
-  } catch (e) {
-    console.error("URL 자동 연결 파싱 오류:", e);
-  }
+  } catch (e) {}
 
-  // .env 에서 주입된 토큰/Gist ID(또는 난독화 토큰 GITHUB_TOKEN_ENC)가 있고 로컬 설정이 비어있다면 자동으로 채움
-  if (!cloudConfig.token) {
-    if (envCfg.GITHUB_TOKEN) {
-      cloudConfig.token = envCfg.GITHUB_TOKEN;
-    } else if (envCfg.GITHUB_TOKEN_ENC) {
-      try {
-        cloudConfig.token = atob(envCfg.GITHUB_TOKEN_ENC.split("").reverse().join(""));
-      } catch (e) {}
-    }
-  }
-  if (!cloudConfig.gistId && envCfg.GITHUB_GIST_ID) {
-    cloudConfig.gistId = envCfg.GITHUB_GIST_ID;
-  }
   updateCloudStatusUI();
 }
 
