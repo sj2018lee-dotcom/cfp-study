@@ -2155,6 +2155,13 @@ select, input[type="text"], textarea {
           <button id="btn-export-data" class="btn-secondary">📥 학습 데이터 내보내기</button>
           <button id="btn-import-data" class="btn-secondary">📤 학습 데이터 불러오기</button>
         </div>
+        <div id="snapshot-panel" style="margin-top:14px; padding:12px; border:1px dashed #94a3b8; border-radius:10px; background:#f8fafc;">
+          <strong>🛟 자동 백업 복원 (이 브라우저에 최근 8개 보관)</strong>
+          <div id="snapshot-last-file-info" style="font-size:0.82rem; color:#475569; margin:6px 0;"></div>
+          <select id="snapshot-select" style="width:100%; margin-bottom:8px;"></select>
+          <button id="btn-restore-snapshot" type="button" class="btn-secondary">♻️ 선택한 시점으로 복원</button>
+          <div style="font-size:0.78rem; color:#64748b; margin-top:6px;">※ 브라우저 사이트 데이터를 지우면 자동 백업도 함께 사라집니다. 중요한 시점에는 반드시 JSON 파일로 내보내세요.</div>
+        </div>
       </div>
 
       <div class="update-guide-box" id="exam-guide-summary">
@@ -7483,10 +7490,120 @@ function saveState(options = {}) {
   } catch (e) {
     console.error("상태 저장 오류:", e);
   }
+  if (takeSnapshot("자동 백업") && typeof renderSnapshotPanel === "function") renderSnapshotPanel();
   updateHeaderStats();
   if (!options.skipCloudPush) {
     scheduleCloudPush();
   }
+}
+
+// ===== 자동 스냅샷 백업 (브라우저 내 보관, 최근 N개 순환) =====
+const SNAPSHOT_KEY = "cfp_agent_snapshots_v1";
+const LAST_FILE_BACKUP_KEY = "cfp_last_file_backup_at_v1";
+const SNAPSHOT_MAX = 8;
+const SNAPSHOT_MIN_INTERVAL_MS = 30 * 60 * 1000;
+
+function readSnapshots() {
+  try {
+    const list = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function countUserNotes(payload) {
+  const qn = payload.questionNotes ? Object.keys(payload.questionNotes).length : 0;
+  const cs = Array.isArray(payload.customSummaryCards) ? payload.customSummaryCards.length : 0;
+  const sq = Array.isArray(payload.selfQuizCards) ? payload.selfQuizCards.length : 0;
+  return { qn, cs, sq };
+}
+
+// force=true 이면 시간 간격 제한 없이 즉시 생성 (가져오기/복원 직전 등)
+function takeSnapshot(reason, force = false) {
+  try {
+    const list = readSnapshots();
+    if (!force && list[0] && Date.now() - new Date(list[0].createdAt).getTime() < SNAPSHOT_MIN_INTERVAL_MS) return false;
+    const payload = buildSyncPayload();
+    const serialized = JSON.stringify(payload);
+    const last = list[0];
+    if (last) {
+      if (last.serialized === serialized) return false;
+      if (!force && Date.now() - new Date(last.createdAt).getTime() < SNAPSHOT_MIN_INTERVAL_MS) return false;
+    }
+    const entry = { createdAt: new Date().toISOString(), reason, counts: countUserNotes(payload), serialized };
+    list.unshift(entry);
+    let trimmed = list.slice(0, SNAPSHOT_MAX);
+    while (trimmed.length >= 1) {
+      try {
+        localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(trimmed));
+        return true;
+      } catch (e) {
+        if (trimmed.length === 1) break;
+        trimmed = trimmed.slice(0, -1); // 용량 부족 시 가장 오래된 것부터 삭제
+      }
+    }
+    return false;
+  } catch (e) {
+    console.error("스냅샷 생성 오류:", e);
+    return false;
+  }
+}
+
+function restoreSnapshot(index) {
+  const list = readSnapshots();
+  const entry = list[index];
+  if (!entry) return;
+  const payload = JSON.parse(entry.serialized);
+  takeSnapshot("복원 직전 자동 보관", true);
+  const keys = [
+    "wrongList", "wrongNotes", "bookmarks", "history", "solvedMap", "unsolvedTombstones",
+    "questionNotes", "customSummaryCards", "selfQuizCards", "deletedDefaultCardIds",
+    "stats", "customCards", "customQuestions"
+  ];
+  keys.forEach((k) => {
+    if (payload[k] !== undefined) state[k] = payload[k];
+  });
+  saveState({ skipCloudPush: true });
+  location.reload();
+}
+
+function renderSnapshotPanel() {
+  const sel = document.getElementById("snapshot-select");
+  const info = document.getElementById("snapshot-last-file-info");
+  if (info) {
+    const t = localStorage.getItem(LAST_FILE_BACKUP_KEY);
+    info.textContent = t
+      ? `마지막 파일 백업: ${formatDateTime(t)}`
+      : "아직 파일로 백업한 적이 없습니다. [📥 학습 데이터 내보내기]로 JSON 파일을 꼭 저장해 두세요.";
+  }
+  if (!sel) return;
+  const list = readSnapshots();
+  sel.innerHTML = "";
+  if (!list.length) {
+    sel.innerHTML = '<option value="">자동 백업 없음</option>';
+    return;
+  }
+  list.forEach((s, i) => {
+    const c = s.counts || {};
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = `${formatDateTime(s.createdAt)} · ${s.reason} · 문항메모 ${c.qn || 0} / 공식메모 ${c.cs || 0} / 암기카드 ${c.sq || 0}`;
+    sel.appendChild(opt);
+  });
+}
+
+function initSnapshotPanel() {
+  const btn = document.getElementById("btn-restore-snapshot");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const sel = document.getElementById("snapshot-select");
+      if (!sel || sel.value === "") return;
+      if (!confirm("선택한 시점으로 복원합니다. (복원 직전 상태는 자동 백업으로 따로 보관됩니다.) 진행할까요?")) return;
+      restoreSnapshot(Number(sel.value));
+    });
+  }
+  renderSnapshotPanel();
 }
 
 function buildSyncPayload() {
@@ -7534,6 +7651,10 @@ function exportSyncData() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  try {
+    localStorage.setItem(LAST_FILE_BACKUP_KEY, new Date().toISOString());
+  } catch (e) {}
+  renderSnapshotPanel();
 }
 
 // 지능형 병합(Smart Merge) 로직: 두 기기의 학습 기록 및 단권화 노트 합산
@@ -7543,6 +7664,7 @@ function smartMergeSyncData(incoming, options = {}) {
   }
 
   normalizeAndRecalculateState();
+  takeSnapshot("가져오기/동기화 병합 직전", true);
 
   // 0. 미풀이 초기화 타임스탬프(unsolvedTombstones) 병합
   const incTombstones = incoming.unsolvedTombstones && typeof incoming.unsolvedTombstones === "object"
@@ -10006,6 +10128,8 @@ function initCloudSyncEvents() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadState();
+  takeSnapshot("앱 시작 시점");
+  initSnapshotPanel();
   initFilters();
   initTabs();
   initActions();
